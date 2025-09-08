@@ -7,9 +7,10 @@ function AboutUs() {
             <div className="container">
                 <div className="row g-5 align-items-center">
                     <div className="col-lg-6 wow fadeIn" data-wow-delay="0.1s">
-                        <div className="row g-0 about-bg rounded overflow-hidden">
+                        <div className="row g-0 about-bg rounded overflow-hidden mx-0" style={{overflowX: "hidden"}}>
                             <div className="col-6 text-start">
-                                <img className="img-fluid w-100" src="/assets/img/about-1.jpg"/>
+                                <img className="img-fluid" src="/assets/img/about-1.jpg" style={{width: "100%", maxWidth: "100%"}}/>
+
                             </div>
                             <div className="col-6 text-start">
                                 <img className="img-fluid" src="/assets/img/about-2.jpg" style={{width: "85%",marginTop: "15%"}}/>

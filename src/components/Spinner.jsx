@@ -1,6 +1,6 @@
 import React from 'react'
 
-function spinner() {
+function Spinner() {
   return (
     <>
 
@@ -14,4 +14,4 @@ function spinner() {
   )
 }
 
-export default spinner
+export default Spinner

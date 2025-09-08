@@ -1,7 +1,7 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 
-function Navbar() {
+function UserNavbar() {
   return (
     <>
 
@@ -15,12 +15,12 @@ function Navbar() {
             <div className="collapse navbar-collapse" id="navbarCollapse">
                 <div className="navbar-nav ms-auto p-4 p-lg-0">
                     <Link to="/" className="nav-item nav-link active">Home</Link>
-                    <Link to="/About" className="nav-item nav-link">About</Link>
-                    <Link to="/Contact" className="nav-item nav-link">Contact</Link>
-                    <Link to="/SignUp" className="nav-item nav-link">SignUp</Link>
-                    <Link to="/Login" className="nav-item nav-link">Login</Link>
+                    <Link to="/SignUp" className="nav-item nav-link">Jobs</Link>
+                    <Link to="/user-about" className="nav-item nav-link">About</Link>
+                    <Link to="/user-contact" className="nav-item nav-link">Contact</Link>
+                    <Link to="/my-profile" className="nav-item nav-link">MyProfile</Link>
                 </div>
-                <Link to="/SignUp" className="btn btn-primary rounded-0 py-4 px-lg-5 d-none d-lg-block">Post A Job<i className="fa fa-arrow-right ms-3"></i></Link>
+                <Link to="" className="btn btn-primary rounded-0 py-4 px-lg-5 d-none d-lg-block">Post A Job<i className="fa fa-arrow-right ms-3"></i></Link>
             </div>
         </nav>
     </>
@@ -28,4 +28,4 @@ function Navbar() {
   )
 }
 
-export default Navbar
+export default UserNavbar
