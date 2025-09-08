@@ -2,7 +2,7 @@
 import React from "react";
 import { Outlet } from "react-router-dom";
 import UserNavbar from "../components/UserNavbar";
-import Footer from "../components/Footer";
+import UserFooter from "../components/UserFooter";
 
 const UserLayout = () => {
   return (
@@ -11,7 +11,7 @@ const UserLayout = () => {
       <main style={{ padding: "20px" }}>
         <Outlet />     {/* 👈 This is where child pages (UserHome, Profile, etc.) render */}
       </main>
-      <Footer/>
+      <UserFooter/>
     </>
   );
 };

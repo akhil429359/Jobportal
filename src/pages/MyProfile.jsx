@@ -30,7 +30,6 @@ const MyProfile = () => {
         setLoading(false);
       }
     };
-
     fetchProfile();
   }, []);
 
@@ -39,7 +38,7 @@ const MyProfile = () => {
     if (!profile?.resume) return;
     try {
       const response = await api.get(`user-profiles/${profile.id}/`, {
-        responseType: "blob", // download file
+        responseType: "blob",
       });
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement("a");
@@ -53,7 +52,23 @@ const MyProfile = () => {
     }
   };
 
-  // handle input
+  // Switch role between Jobseeker and Employer
+  const handleSwitchRole = async () => {
+    if (!profile) return;
+    const newRole = profile.role.toLowerCase() === "jobseeker" ? "employer" : "jobseeker";
+    try {
+      const response = await api.patch(`user-profiles/${profile.id}/`, {
+        role: newRole,
+      });
+      setProfile(response.data);
+      alert(`Switched role to ${newRole.charAt(0).toUpperCase() + newRole.slice(1)}!`);
+    } catch (err) {
+      console.error("Error switching role:", err);
+      alert("Failed to switch role.");
+    }
+  };
+
+  // Handle input changes
   const handleChange = (e) => {
     const { name, value, files } = e.target;
     setFormData({
@@ -62,19 +77,18 @@ const MyProfile = () => {
     });
   };
 
-  // create profile
+  // Create new profile
   const handleCreateProfile = async (e) => {
     e.preventDefault();
     const form = new FormData();
     for (let key in formData) {
       if (formData[key]) form.append(key, formData[key]);
     }
-
     try {
       const response = await api.post("user-profiles/", form, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-      setProfile(response.data); // set newly created profile
+      setProfile(response.data);
       setShowForm(false);
     } catch (err) {
       console.error("Error creating profile:", err);
@@ -83,7 +97,7 @@ const MyProfile = () => {
 
   if (loading) return <div>Loading...</div>;
 
-  // case 1: profile exists
+  // Case 1: profile exists
   if (profile) {
     return (
       <div style={styles.container}>
@@ -95,20 +109,32 @@ const MyProfile = () => {
           <p><strong>Experience:</strong> {profile.experience}</p>
           <p><strong>About Me:</strong> {profile.about_me}</p>
           {profile.resume ? (
-            <button style={styles.button} onClick={viewResume}>View Resume</button>) : (<p><strong>Resume:</strong> Empty</p>)}
+            <button style={styles.button} onClick={viewResume}>View Resume</button>
+          ) : (
+            <p><strong>Resume:</strong> None</p>
+          )}
 
-          <button
-            style={{ ...styles.button, marginLeft: "10px" }}
-            onClick={() => navigate(`/edit-profile/${profile.id}`)}
-          >
-            Edit Profile
-          </button>
+          <div style={{ display: "flex", gap: "10px", marginTop: "10px" }}>
+            <button
+              style={styles.button}
+              onClick={() => navigate(`/edit-profile/${profile.id}`)}
+            >
+              Edit Profile
+            </button>
+
+            <button
+              style={{ ...styles.button, backgroundColor: "green" }}
+              onClick={handleSwitchRole}
+            >
+              {profile.role.toLowerCase() === "jobseeker" ? "Switch to Employer" : "Switch to Jobseeker"}
+            </button>
+          </div>
         </div>
       </div>
     );
   }
 
-  // case 2: no profile found
+  // Case 2: no profile found
   return (
     <div style={styles.container}>
       <h2>My Profile</h2>
@@ -133,10 +159,7 @@ const MyProfile = () => {
           <label>Resume (PDF)</label>
           <input type="file" name="resume" accept="application/pdf" onChange={handleChange} />
 
-
-          <button type="submit" style={styles.button}>
-            Save Profile
-          </button>
+          <button type="submit" style={styles.button}>Save Profile</button>
         </form>
       )}
     </div>

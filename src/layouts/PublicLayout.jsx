@@ -1,12 +1,12 @@
 import React from "react";
 import { Outlet } from "react-router-dom";
-import UserNavbar from "../components/UserNavbar";
 import Footer from "../components/Footer";
+import Navbar from "../components/navbar";
 
 const PublicLayout = () => {
   return (
     <>
-      <UserNavbar/>
+    <Navbar/>
       <Outlet /> {/* 👈 Renders the matched child route */}
       <Footer/>
     </>

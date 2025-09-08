@@ -20,7 +20,7 @@ function Navbar() {
                     <Link to="/SignUp" className="nav-item nav-link">SignUp</Link>
                     <Link to="/Login" className="nav-item nav-link">Login</Link>
                 </div>
-                <Link to="/SignUp" className="btn btn-primary rounded-0 py-4 px-lg-5 d-none d-lg-block">Post A Job<i className="fa fa-arrow-right ms-3"></i></Link>
+                <Link to="/SignUp" className="btn btn-primary rounded-0 py-4 px-lg-5 d-none d-lg-block">Apply For Job<i className="fa fa-arrow-right ms-3"></i></Link>
             </div>
         </nav>
     </>

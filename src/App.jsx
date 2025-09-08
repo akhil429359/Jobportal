@@ -19,6 +19,8 @@ import UserAbout from './pages/UserAbout';
 import UserServices from './pages/UserServices';
 import UserContact from './pages/UserContact';
 import UserPrivacy from './pages/UserPrivacy';
+import JobPost from './pages/JobPosts';
+import JobList from './pages/JobList';
 
 function App() {
   return (
@@ -36,14 +38,18 @@ function App() {
         </Route>
 
         {/* Private Route */}
-        <Route element={  <ProtectedRoute>    <UserLayout />   {/* contains <UserNavbar /> + <Outlet /> */}  </ProtectedRoute>}>
+        <Route element={  <ProtectedRoute>    <UserLayout /></ProtectedRoute>}>
           <Route path="/user-home" element={<UserHome />} />
           <Route path="/my-profile" element={<MyProfile />} />
           <Route path='/edit-profile/:id' element={<EditProfile/>} />
-          <Route path="/user-about" element={<UserAbout />} caseSensitive={false} />
+          <Route path="/user-about" element={<UserAbout />} />
           <Route path="/user-contact" element={<UserContact />} />
           <Route path="/user-services" element={<UserServices />} />
           <Route path="/user-privacy" element={<UserPrivacy />} />
+          <Route path='/job-post' element={<JobPost/>} />
+          <Route path='/job-list' element={<JobList/>} />
+
+          
 
         </Route>
       </Routes>
