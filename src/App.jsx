@@ -21,6 +21,14 @@ import UserContact from './pages/UserContact';
 import UserPrivacy from './pages/UserPrivacy';
 import JobPost from './pages/JobPosts';
 import JobList from './pages/JobList';
+import Userslist from './pages/Userslist';
+import ChatWindows from './pages/ChatWindows';
+import UserDetails from './pages/UserDetails';
+import GroupChatsPage from './pages/GroupChatsPage';
+import GroupDetails from './pages/GroupDetails';
+import GroupList from './pages/GroupList';
+import EditJobPage from './pages/EditJobPage';
+const currentUserId = parseInt(localStorage.getItem("user_id"));
 
 function App() {
   return (
@@ -48,8 +56,13 @@ function App() {
           <Route path="/user-privacy" element={<UserPrivacy />} />
           <Route path='/job-post' element={<JobPost/>} />
           <Route path='/job-list' element={<JobList/>} />
-
-          
+          <Route path='/user-list' element={<Userslist/>} />
+          <Route path="/chat/:userId" element={<ChatWindows />} />
+          <Route path="/profile/:id" element={<UserDetails/>} />
+          <Route path="/groups-list" element={<GroupList/>} />
+          <Route path="/groups/:id" element={<GroupDetails/>} />
+          <Route path="/group-chat/:id" element={<GroupChatsPage currentUserId={currentUserId} />}/>
+          <Route path="/jobs/edit/:id" element={<EditJobPage />} />
 
         </Route>
       </Routes>

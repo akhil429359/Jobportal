@@ -13,8 +13,7 @@ const JobPost = () => {
     salary_range: "",
     requirements: "",
     status: "open",
-    requirements: "",
-  });
+    });
 
   const navigate = useNavigate();
 

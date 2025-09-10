@@ -9,17 +9,17 @@ function UserFooter() {
                 <div className="row g-5">
                     <div className="col-lg-3 col-md-6">
                         <h5 className="text-white mb-4">Company</h5>
-                        <Link className="btn btn-link text-white-50" to="/UserAbout">About Us</Link>
-                        <Link className="btn btn-link text-white-50" to="/UserContact">Contact Us</Link>
-                        <Link className="btn btn-link text-white-50" to="/UserServices">Our Services</Link>
-                        <Link className="btn btn-link text-white-50" to="/UserPrivacy">Privacy Policy</Link>
+                        <Link className="btn btn-link text-white-50" to="/user-about">About Us</Link>
+                        <Link className="btn btn-link text-white-50" to="/user-contact">Contact Us</Link>
+                        <Link className="btn btn-link text-white-50" to="/user-services">Our Services</Link>
+                        <Link className="btn btn-link text-white-50" to="/user-privacy">Privacy Policy</Link>
                     </div>
                     <div className="col-lg-3 col-md-6">
                         <h5 className="text-white mb-4">Quick Links</h5>
-                        <Link className="btn btn-link text-white-50" to="/UserAbout">About Us</Link>
-                        <Link className="btn btn-link text-white-50" to="/UserContact">Contact Us</Link>
-                        <Link className="btn btn-link text-white-50" to="/UserServices">Our Services</Link>
-                        <Link className="btn btn-link text-white-50" to="/UserPrivacy">Privacy Policy</Link>
+                        <Link className="btn btn-link text-white-50" to="/user-about">About Us</Link>
+                        <Link className="btn btn-link text-white-50" to="/user-contact">Contact Us</Link>
+                        <Link className="btn btn-link text-white-50" to="/user-services">Our Services</Link>
+                        <Link className="btn btn-link text-white-50" to="/user-privacy">Privacy Policy</Link>
                     </div>
                     <div className="col-lg-3 col-md-6">
                         <h5 className="text-white mb-4">Contact</h5>
@@ -47,7 +47,7 @@ function UserFooter() {
                 <div className="copyright">
                     <div className="row">
                         <div className="col-md-6 text-center text-md-start mb-3 mb-md-0">
-                            &copy; <Link className="border-bottom" to="/">Job Entry</Link>, All Right Reserved. 
+                            &copy; <Link className="border-bottom" to="/user-home">Job Entry</Link>, All Right Reserved. 
 							
 							Designed By <Link className="border-bottom" to="https://htmlcodex.com">HTML Codex</Link>
                         </div>

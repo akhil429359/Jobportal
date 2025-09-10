@@ -27,8 +27,8 @@ function UserNavbar() {
                 <div className="navbar-nav ms-auto p-4 p-lg-0">
                     <Link to="/user-home" className="nav-item nav-link active">Home</Link>
                     <Link to="/job-list" className="nav-item nav-link">Jobs</Link>
-                    <Link to="/user-about" className="nav-item nav-link">About</Link>
-                    <Link to="/user-contact" className="nav-item nav-link">Contact</Link>
+                    <Link to="/groups-list" className="nav-item nav-link">Groups</Link>
+                    <Link to="/user-list" className="nav-item nav-link">Users</Link>
                     <Link to="/my-profile" className="nav-item nav-link">MyProfile</Link>
                     <button onClick={handleLogout} className="nav-item nav-link btn btn-link" style={{ textDecoration: "none" }}>  Logout </button>
                 </div>
