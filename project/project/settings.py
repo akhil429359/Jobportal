@@ -176,11 +176,4 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 APPEND_SLASH = True
 
 
-import os
-from dotenv import load_dotenv
 
-load_dotenv()  # loads the .env file
-
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-DEBUG = os.getenv("DEBUG", "False") == "True"
-SECRET_KEY = os.getenv("SECRET_KEY")
