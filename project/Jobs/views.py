@@ -37,7 +37,13 @@ class JobPostsViewSet(viewsets.ModelViewSet):
         if profile.role != 'employer':
             raise PermissionDenied("Only employers can post jobs.")
 
-        serializer.save(user=self.request.user)
+        # ✅ Ensure questions is always a list (not null)
+        validated_data = serializer.validated_data
+        if "questions" not in validated_data or validated_data["questions"] is None:
+            validated_data["questions"] = []
+
+        serializer.save(user=self.request.user, **validated_data)
+
 
     def perform_update(self, serializer):
         job = self.get_object()
@@ -51,13 +57,21 @@ class JobPostsViewSet(viewsets.ModelViewSet):
         instance.delete()
 
 
-
 class ApplicationViewSet(viewsets.ModelViewSet):
+    """
+    Handles CRUD operations for job applications.
+    Role-based filtering:
+      - Employers can see applications for their own jobs only.
+      - Job seekers can see only their own applications.
+    """
     serializer_class = ApplicationSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
+        """Return applications filtered by user role and optional job_id."""
         user = self.request.user
+
+        # ✅ Ensure user has a profile, otherwise return no results
         try:
             profile = UserProfile.objects.get(user=user)
         except UserProfile.DoesNotExist:
@@ -65,13 +79,13 @@ class ApplicationViewSet(viewsets.ModelViewSet):
 
         queryset = Application.objects.all()
 
-        # ✅ Apply role-based filtering first (security!)
+        # ✅ Role-based filtering
         if profile.role == "employer":
             queryset = queryset.filter(job_id__user=user)
-        else:
+        else:  # job seeker
             queryset = queryset.filter(applicant_id=user)
 
-        # ✅ Then apply job filter (only within employer's own jobs)
+        # ✅ Optional filtering by job_id (for employer dashboards)
         job_id = self.request.query_params.get("job")
         if job_id:
             queryset = queryset.filter(job_id=job_id)
@@ -79,11 +93,16 @@ class ApplicationViewSet(viewsets.ModelViewSet):
         return queryset
 
     def perform_create(self, serializer):
+        """
+        Create a new application and notify the employer.
+        The applicant_id is always set to the logged-in user.
+        """
         application = serializer.save(applicant_id=self.request.user)
-        
-        # Notify the employer
+
         job = application.job_id
-        employer = job.user  
+        employer = job.user
+
+        # ✅ Notify employer
         Notification.objects.create(
             user=employer,
             message=f"{self.request.user.username} applied for {job.title}",
@@ -91,7 +110,13 @@ class ApplicationViewSet(viewsets.ModelViewSet):
         )
 
     def perform_update(self, serializer):
+        """
+        Allow only employers to update application status.
+        Notify job seeker if status changes.
+        """
         user = self.request.user
+
+        # ✅ Ensure user has profile and is employer
         try:
             profile = UserProfile.objects.get(user=user)
         except UserProfile.DoesNotExist:
@@ -104,10 +129,10 @@ class ApplicationViewSet(viewsets.ModelViewSet):
         serializer.save()
         updated_instance = self.get_object()
 
-        # Send notification if status changed
+        # ✅ Notify job seeker if status changed
         if old_instance.status != updated_instance.status:
             Notification.objects.create(
                 user=updated_instance.applicant_id,
                 message=f"Your application for '{updated_instance.job_id.title}' is now {updated_instance.status}",
-                link=f"/job-list"
+                link="/job-list"
             )

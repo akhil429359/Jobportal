@@ -34,6 +34,7 @@ class UserProfile(models.Model):
     ]
 
     user = models.OneToOneField("User", on_delete=models.CASCADE)
+    profile_image = models.ImageField(upload_to="profile_images/", null=True, blank=True)
     skills = models.TextField()
     education = models.TextField()
     experience = models.TextField()

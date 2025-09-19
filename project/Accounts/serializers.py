@@ -15,16 +15,14 @@ class UserSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         password = validated_data.pop("password")
         user = User(**validated_data)
-        user.set_password(password)  # <-- This is critical
+        user.set_password(password) 
         user.save()
         return user
-
-    
 
 class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProfile
-        fields = ['id','user', 'skills', 'education', 'experience', 'resume', 'about_me','role']
+        fields = ['id','user', 'profile_image','skills', 'education', 'experience', 'resume', 'about_me','role']
         read_only_fields = ['id','user'] 
 
 

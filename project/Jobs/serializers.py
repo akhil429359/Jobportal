@@ -15,6 +15,7 @@ class JobPostsSerializer(serializers.ModelSerializer):
             "id": obj.user.id,
             "username": obj.user.username
         }
+    
 
 class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
@@ -23,12 +24,13 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
 class ApplicationSerializer(serializers.ModelSerializer):
     applicant_profile = serializers.SerializerMethodField()
-    applicant_user = serializers.SerializerMethodField()  # <-- NEW
+    applicant_user = serializers.SerializerMethodField() 
     job_details = serializers.SerializerMethodField()
+    answers = serializers.JSONField(required=False)
 
     class Meta:
         model = Application
-        fields = ["id", "job_id", "job_details", "status", "applied_date", "applicant_profile", "applicant_user"]
+        fields = ["id", "job_id", "job_details", "status","answers", "applied_date", "applicant_profile", "applicant_user"]
         read_only_fields = ["applied_date"]
 
     def get_applicant_profile(self, obj):
@@ -39,7 +41,6 @@ class ApplicationSerializer(serializers.ModelSerializer):
             return None
 
     def get_applicant_user(self, obj):
-        # Return basic info from User model
         user = obj.applicant_id
         return {
             "id": user.id,
@@ -53,4 +54,9 @@ class ApplicationSerializer(serializers.ModelSerializer):
             "location": obj.job_id.location,
             "salary_range": obj.job_id.salary_range,
             "status": obj.job_id.status,
+            "questions": obj.job_id.questions,
         }
+    def validate_answers(self, value):
+        if not isinstance(value, dict):
+            raise serializers.ValidationError("Answers must be a dictionary of {question: answer}.")
+        return value

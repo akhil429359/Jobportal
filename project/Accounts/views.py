@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from .serializers import UserSerializer,UserProfileSerializer,NotificationSerializer,ContactMessageSerializer
 from rest_framework.permissions import IsAuthenticated,AllowAny
 from django.db.models import Q
+from rest_framework.parsers import MultiPartParser, FormParser
 from django.core.mail import send_mail
 from django.conf import settings
 
@@ -15,9 +16,8 @@ class ContactMessageCreateView(generics.CreateAPIView):
     serializer_class = ContactMessageSerializer
 
     def perform_create(self, serializer):
-        contact = serializer.save()  # Save message in DB
+        contact = serializer.save()  
 
-        # Send email notification
         subject = f"New Contact Message: {contact.subject}"
         message = (
             f"You have a new message from {contact.name} ({contact.email}):\n\n"
@@ -28,7 +28,7 @@ class ContactMessageCreateView(generics.CreateAPIView):
             subject,
             message,
             settings.DEFAULT_FROM_EMAIL if hasattr(settings, 'DEFAULT_FROM_EMAIL') else None,
-            ['akhilpioussince2001@example.com'],  # Replace with your admin email
+            ['akhilpioussince2001@example.com'], 
             fail_silently=False,
         )
 
@@ -40,7 +40,7 @@ class UserViewSet(viewsets.ModelViewSet):
     search_fields = ['username', 'first_name', 'last_name', 'email']
 
     def get_permissions(self):
-        if self.action == 'create':  # signup action
+        if self.action == 'create':  
             return [AllowAny()]
         return [IsAuthenticated()]
 
@@ -55,10 +55,8 @@ class UserViewSet(viewsets.ModelViewSet):
         """Return all users except current user, with optional search"""
         search = request.query_params.get("search", "").strip()
 
-        # Exclude current user
         users = User.objects.exclude(id=request.user.id)
 
-        # Apply search filter
         if search:
             users = users.filter(
                 Q(username__icontains=search)
@@ -103,24 +101,20 @@ class UserProfileViewSet(viewsets.ModelViewSet):
     queryset = UserProfile.objects.all()
     serializer_class = UserProfileSerializer
     permission_classes = [IsAuthenticated]
+    parser_classes = (MultiPartParser, FormParser)
 
     def get_queryset(self):
         user = self.request.user
         if user.is_staff:
-            return UserProfile.objects.all()  # admin sees all profiles
-        return UserProfile.objects.filter(user=user)  # normal user sees own only
+            return UserProfile.objects.all()  
+        return UserProfile.objects.filter(user=user)  
 
     def perform_create(self, serializer):
         user = self.request.user
         if user.is_staff and 'user' in self.request.data:
-            # admin can assign profile to any user
             serializer.save(user=User.objects.get(id=self.request.data['user']))
         else:
-            # normal user -> auto-assign to self
             serializer.save(user=user)
-
-
-
 
 class NotificationViewSet(viewsets.ModelViewSet):
     serializer_class = NotificationSerializer
