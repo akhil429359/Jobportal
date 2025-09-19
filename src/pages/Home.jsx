@@ -1,5 +1,4 @@
 import React from 'react'
-import Search from '../components/Search'
 import Category from '../components/Category'
 import Carousel from '../components/Carousel'
 function Home() {
@@ -7,7 +6,6 @@ function Home() {
     <>
     <div className="container-xxl py-5">
     <Carousel/>
-    <Search/>
     <Category/>
     </div>
     </>

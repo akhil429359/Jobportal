@@ -28,6 +28,11 @@ import GroupChatsPage from './pages/GroupChatsPage';
 import GroupDetails from './pages/GroupDetails';
 import GroupList from './pages/GroupList';
 import EditJobPage from './pages/EditJobPage';
+import EmployerJobPosts from './components/EmployerJobPosts';
+import EmployerApplication from './pages/EmployerApplication';
+import NotifyJobAppDetail from './pages/NotifyJobAppDetail';
+import Connections from './pages/Connections';
+import JobApply from './pages/JobApply';
 const currentUserId = parseInt(localStorage.getItem("user_id"));
 
 function App() {
@@ -36,7 +41,7 @@ function App() {
       <Routes>
         {/* Public Routes */}
         <Route element={<PublicLayout />}>
-          <Route index element={<Home />} />   {/* same as path="/" */}
+          <Route index element={<Home />} />  
           <Route path="about" element={<About />} />
           <Route path="contact" element={<Contact />} />
           <Route path="signup" element={<SignUp />} />
@@ -56,13 +61,20 @@ function App() {
           <Route path="/user-privacy" element={<UserPrivacy />} />
           <Route path='/job-post' element={<JobPost/>} />
           <Route path='/job-list' element={<JobList/>} />
+          <Route path="/jobs/:jobId/apply" element={<JobApply />} />
           <Route path='/user-list' element={<Userslist/>} />
           <Route path="/chat/:userId" element={<ChatWindows />} />
           <Route path="/profile/:id" element={<UserDetails/>} />
           <Route path="/groups-list" element={<GroupList/>} />
           <Route path="/groups/:id" element={<GroupDetails/>} />
           <Route path="/group-chat/:id" element={<GroupChatsPage currentUserId={currentUserId} />}/>
-          <Route path="/jobs/edit/:id" element={<EditJobPage />} />
+          <Route path="/jobs-edit/:id" element={<EditJobPage />} />
+          <Route path="/my-jobs" element={<EmployerJobPosts />} />
+          <Route path="/employer-applications/:jobId" element={<EmployerApplication />} />
+          <Route path="/applications/:id" element={<NotifyJobAppDetail />} />
+          <Route path="/connections" element={<Connections />} />
+
+
 
         </Route>
       </Routes>

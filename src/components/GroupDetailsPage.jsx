@@ -1,102 +1,117 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import AddMembersModal from "./AddMembersModal";
 import api from "../api/axios";
 
 function GroupDetailsPage() {
-  const { id } = useParams(); // group id
-  const [group, setGroup] = useState(null);
-  const [currentUserId, setCurrentUserId] = useState(null);
-  const [isMember, setIsMember] = useState(false);
-  const [showAddMemberModal, setShowAddMemberModal] = useState(false);
+  const { id } = useParams();
   const navigate = useNavigate();
 
-  // Fetch current user
+  const [group, setGroup] = useState(null);
+  const [showAddMemberModal, setShowAddMemberModal] = useState(false);
+
+  const fetchGroup = useCallback(async () => {
+    try {
+      const res = await api.get(`group-chats/${id}/`);
+      setGroup(res.data);
+    } catch (err) {
+      console.error("Error fetching group:", err);
+    }
+  }, [id]);
+
   useEffect(() => {
-    const fetchCurrentUser = async () => {
-      try {
-        const res = await api.get("users/"); // current user endpoint
-        const userData = Array.isArray(res.data) ? res.data[0] : res.data;
-        setCurrentUserId(userData.id);
-      } catch (err) {
-        console.error("Error fetching current user:", err);
-      }
-    };
-    fetchCurrentUser();
-  }, []);
+    fetchGroup();
+  }, [fetchGroup]);
 
-  // Fetch group and members
-  useEffect(() => {
-    const fetchGroup = async () => {
-      try {
-        const res = await api.get(`group-chats/${id}/`);
-        setGroup(res.data);
+  const handleLeaveGroup = async () => {
+    if (!window.confirm("Are you sure you want to leave this group?")) return;
 
-        // check membership
-        const membersRes = await api.get(`group-members/?group_id=${id}`);
-        const memberIds = membersRes.data.map((m) => m.user.id);
-        if (memberIds.includes(currentUserId) || res.data.admin_id?.id === currentUserId) {
-          setIsMember(true);
-        } else {
-          setIsMember(false);
-        }
-      } catch (err) {
-        console.error("Error fetching group:", err);
-      }
-    };
+    try {
+      const res = await api.post(`group-chats/${id}/leave/`);
+      alert(res.data.detail);
+      setGroup((prev) => ({ ...prev, is_member: false }));
+    } catch (err) {
+      console.error(err);
+      alert(err.response?.data?.detail || "Cannot leave group");
+    }
+  };
 
-    if (currentUserId) fetchGroup();
-  }, [id, currentUserId]);
+  if (!group) return <p style={{ textAlign: "center", marginTop: 50 }}>Loading group...</p>;
 
-  if (!group) return <p>Loading group...</p>;
+  const { image, group_name, admin_username, admin_id, description, is_member, is_admin } = group;
 
   return (
-    <div style={{ padding: 20 }}>
-      <h2>{group.group_name}</h2>
-      <p>Admin: {group.admin_id?.username}</p>
+    <div style={styles.container}>
+      {image && <img src={image} alt="Group" style={styles.image} />}
+      <h2>{group_name}</h2>
+      <p>Admin: {admin_username || admin_id?.username}</p>
 
-      {/* Group chat button only for members */}
-      {isMember && (
-        <button
-          onClick={() => navigate(`/group-chat/${group.id}`)}
-          style={{
-            marginRight: 10,
-            padding: "8px 12px",
-            background: "#4caf50",
-            color: "white",
-            border: "none",
-            borderRadius: 6,
-          }}
-        >
-          Enter Group Chat
-        </button>
+      {description && (
+        <p style={styles.description}>
+          <strong>Description:</strong> {description}
+        </p>
       )}
 
-      {/* Add Member button only for admin */}
-      {currentUserId && group.admin_id?.id === currentUserId && (
-        <button
-          onClick={() => setShowAddMemberModal(true)}
-          style={{
-            padding: "8px 12px",
-            background: "#2196f3",
-            color: "#fff",
-            border: "none",
-            borderRadius: 6,
-            cursor: "pointer",
-          }}
-        >
-          Add Member
-        </button>
-      )}
+      <div style={styles.buttonContainer}>
+        {is_member && (
+          <>
+            <button style={{ ...styles.button, background: "#4caf50" }} onClick={() => navigate(`/group-chat/${id}`)}>
+              Enter Group Chat
+            </button>
+            <button style={{ ...styles.button, background: "#f44336" }} onClick={handleLeaveGroup}>
+              Leave Group
+            </button>
+          </>
+        )}
 
-      <AddMembersModal
-        visible={showAddMemberModal}
-        onClose={() => setShowAddMemberModal(false)}
-        groupId={group.id}
-        adminId={group.admin_id?.id}
-      />
+        {is_admin && (
+          <button style={{ ...styles.button, background: "#2196f3" }} onClick={() => setShowAddMemberModal(true)}>
+            Add Member
+          </button>
+        )}
+      </div>
+
+      {showAddMemberModal && (
+        <AddMembersModal visible={showAddMemberModal} onClose={() => setShowAddMemberModal(false)} groupId={id} />
+      )}
     </div>
   );
 }
+
+const styles = {
+  container: {
+    maxWidth: 600,
+    margin: "50px auto",
+    padding: 20,
+    border: "1px solid #ccc",
+    borderRadius: 10,
+    boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
+  },
+  image: {
+    width: "100%",
+    maxHeight: 250,
+    objectFit: "cover",
+    borderRadius: 8,
+    marginBottom: 12,
+  },
+  description: {
+    marginTop: 8,
+    marginBottom: 16,
+    color: "#555",
+    wordWrap: "break-word",
+    overflowWrap: "break-word",
+    whiteSpace: "pre-wrap",
+    maxHeight: 150,
+    overflowY: "auto",
+  },
+  buttonContainer: { display: "flex", gap: 10 },
+  button: {
+    padding: "8px 12px",
+    color: "#fff",
+    border: "none",
+    borderRadius: 6,
+    cursor: "pointer",
+  },
+};
 
 export default GroupDetailsPage;

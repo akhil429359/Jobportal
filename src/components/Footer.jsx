@@ -49,7 +49,6 @@ function Footer() {
                         <div className="col-md-6 text-center text-md-start mb-3 mb-md-0">
                             &copy; <Link className="border-bottom" to="/">Job Entry</Link>, All Right Reserved. 
 							
-							Designed By <Link className="border-bottom" to="https://htmlcodex.com">HTML Codex</Link>
                         </div>
                         
                     </div>

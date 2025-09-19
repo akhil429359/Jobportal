@@ -1,87 +1,66 @@
-// src/pages/GroupsListPage.jsx
 import React, { useEffect, useState, useCallback } from "react";
-import api from "../api/axios";
 import { useNavigate } from "react-router-dom";
-import CreateGroupModal from "./CreateGroupModal";
 import debounce from "lodash.debounce";
+import api from "../api/axios";
+import CreateGroupModal from "./CreateGroupModal";
 
 function GroupsListPage({ currentUserId }) {
   const [groups, setGroups] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
+  const [showMyGroupsOnly, setShowMyGroupsOnly] = useState(false);
 
   const navigate = useNavigate();
 
-  // Fetch groups from API
-  const fetchGroups = async (search = "") => {
+  const fetchGroups = useCallback(async (search = "") => {
     try {
       setLoading(true);
-      const res = await api.get("group-chats/", {
-        params: { search: search || undefined },
-      });
-
-      // Check membership and admin
-      const groupsWithFlags = res.data.map((group) => ({
-        ...group,
-        isAdmin: group.admin_id === currentUserId,
-        isMember: group.members?.some((m) => m.user === currentUserId) || group.admin_id === currentUserId,
-      }));
-
-      setGroups(groupsWithFlags);
+      const res = await api.get("group-chats/", { params: { search: search || undefined } });
+      setGroups(res.data);
     } catch (err) {
       console.error("Error fetching groups:", err);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  // Debounced search
-  const debouncedFetchGroups = useCallback(
-    debounce((value) => fetchGroups(value), 300),
-    []
-  );
+  const debouncedFetchGroups = useCallback(debounce(fetchGroups, 300), [fetchGroups]);
 
   useEffect(() => {
     fetchGroups();
-  }, []);
+  }, [fetchGroups]);
 
-  // Handle search input change
   const handleSearchChange = (e) => {
     const value = e.target.value;
     setSearchTerm(value);
     debouncedFetchGroups(value);
   };
 
-  return (
-    <div style={{ padding: 20 }}>
-      <h2>All Groups</h2>
+  const filteredGroups = showMyGroupsOnly ? groups.filter((g) => g.is_member) : groups;
 
-      {/* Search and Create */}
-      <div style={{ display: "flex", gap: 10, marginBottom: 16, flexWrap: "wrap" }}>
+  return (
+    <div style={styles.container}>
+      <h2 style={styles.heading}>Groups</h2>
+
+      <div style={styles.controls}>
         <input
           type="text"
           placeholder="Search groups..."
           value={searchTerm}
           onChange={handleSearchChange}
-          style={{
-            flex: 1,
-            padding: "8px",
-            border: "1px solid #ddd",
-            borderRadius: 5,
-          }}
+          style={styles.input}
         />
         <button
-          onClick={() => setShowModal(true)}
+          onClick={() => setShowMyGroupsOnly(!showMyGroupsOnly)}
           style={{
-            padding: "8px 12px",
-            background: "#2196f3",
-            color: "#fff",
-            border: "none",
-            borderRadius: 5,
-            cursor: "pointer",
+            ...styles.button,
+            background: showMyGroupsOnly ? "#673ab7" : "#2196f3",
           }}
         >
+          {showMyGroupsOnly ? "Show All Groups" : "My Groups"}
+        </button>
+        <button onClick={() => setShowModal(true)} style={{ ...styles.button, background: "#4caf50" }}>
           Start a Group
         </button>
       </div>
@@ -90,41 +69,104 @@ function GroupsListPage({ currentUserId }) {
         visible={showModal}
         onClose={() => {
           setShowModal(false);
-          fetchGroups(searchTerm); // refresh after creating
+          fetchGroups(searchTerm);
         }}
       />
 
-      {/* Group Cards */}
       {loading ? (
         <p>Loading groups...</p>
-      ) : groups.length === 0 ? (
+      ) : filteredGroups.length === 0 ? (
         <p>No groups found.</p>
       ) : (
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 20 }}>
-          {groups.map((group) => (
-            <div
-              key={group.id}
-              style={{
-                width: 220,
-                borderRadius: 10,
-                padding: 14,
-                background: "#f9f9faff",
-                boxShadow: "0 4px 8px rgba(0,0,0,0.08)",
-                cursor: "pointer",
-              }}
-              onClick={() => navigate(`/groups/${group.id}`)}
-            >
-              <div style={{ fontWeight: 700 }}>{group.group_name}</div>
-              <div style={{ color: "#666" }}>Admin: {group.admin_username}</div>
-              <div style={{ fontSize: 12, color: "#888" }}>
-                {group.isMember ? "Member" : "Not a member"}
+        <div style={styles.groupList}>
+          {filteredGroups.map((group) => {
+            const { id, group_name, description, image, is_member } = group;
+
+            return (
+              <div key={id} style={styles.groupCard}>
+                <div style={styles.groupInfo}>
+                  {image && <img src={image} alt={group_name} style={styles.groupImage} />}
+                  <div style={styles.groupText}>
+                    <div style={styles.groupName}>{group_name}</div>
+                    {description && <div style={styles.groupDescription}>{description}</div>}
+                  </div>
+                </div>
+
+                {is_member ? (
+                  <button
+                    onClick={() => navigate(`/groups/${id}`)}
+                    style={styles.viewButton}
+                  >
+                    View
+                  </button>
+                ) : (
+                  <button
+                    onClick={async () => {
+                      try {
+                        const res = await api.post(`group-chats/${id}/join/`);
+                        alert(res.data.detail);
+                        fetchGroups(searchTerm);
+                      } catch (err) {
+                        alert(err.response?.data?.detail || "Could not join group");
+                      }
+                    }}
+                    style={styles.joinButton}
+                  >
+                    Join
+                  </button>
+                )}
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>
   );
 }
+
+const styles = {
+  container: { padding: 20, maxWidth: 700, margin: "0 auto" },
+  heading: { marginBottom: 16 },
+  controls: { display: "flex", gap: 10, marginBottom: 16, flexWrap: "wrap" },
+  input: { flex: 1, padding: 8, border: "1px solid #ddd", borderRadius: 5 },
+  button: { padding: "8px 12px", color: "#fff", border: "none", borderRadius: 5, cursor: "pointer" },
+  groupList: { display: "flex", flexDirection: "column", gap: 12 },
+  groupCard: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    border: "1px solid #ddd",
+    borderRadius: 10,
+    padding: "12px 16px",
+    background: "#fff",
+    boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
+    gap: 12,
+  },
+  groupInfo: { display: "flex", flex: 1, alignItems: "flex-start", gap: 12, minWidth: 0 },
+  groupImage: { width: 60, height: 60, borderRadius: 8, objectFit: "cover", flexShrink: 0 },
+  groupText: { display: "flex", flexDirection: "column", minWidth: 0 },
+  groupName: { fontWeight: 700, fontSize: 16, color: "#000", marginBottom: 4 },
+  groupDescription: { fontSize: 13, color: "#555", wordBreak: "break-word" },
+  viewButton: {
+    padding: "6px 14px",
+    border: "1px solid #0a66c2",
+    color: "#0a66c2",
+    borderRadius: 20,
+    background: "transparent",
+    fontWeight: 600,
+    cursor: "pointer",
+    flexShrink: 0,
+  },
+  joinButton: {
+    padding: "6px 14px",
+    border: "none",
+    background: "#0a66c2",
+    color: "#fff",
+    borderRadius: 20,
+    fontWeight: 600,
+    cursor: "pointer",
+    flexShrink: 0,
+  },
+};
 
 export default GroupsListPage;
